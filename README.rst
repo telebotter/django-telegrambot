@@ -1,4 +1,4 @@
-NOTE: This is a fork of the original django-telegrambot module, it contains updates to new django and ptb versions. To install this fork run: `pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade` The information below are related to the original module.
+NOTE: This is a fork of the original django-telegrambot module, it contains updates to new django and ptb versions. To install this fork run: ```pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade``` The information below are related to the original module.
 
 =============================
 django-telegrambot
