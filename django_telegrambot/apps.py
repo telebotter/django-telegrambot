@@ -196,15 +196,16 @@ class DjangoTelegramBot(AppConfig):
                         bot = telegram.Bot(token=token, request=request)
 
                     DjangoTelegramBot.dispatchers.append(Dispatcher(bot, None, workers=0, use_context=context))
-                    hookurl = '{}/{}/{}/'.format(webhook_site, webhook_base, token)
-                    max_connections = b.get('WEBHOOK_MAX_CONNECTIONS', 40)
-                    setted = bot.setWebhook(hookurl, certificate=certificate, timeout=timeout, max_connections=max_connections, allowed_updates=allowed_updates)
-                    webhook_info = bot.getWebhookInfo()
-                    real_allowed = webhook_info.allowed_updates if webhook_info.allowed_updates else ["ALL"]
-
-                    bot.more_info = webhook_info
-                    logger.info('Telegram Bot <{}> setting webhook [ {} ] max connections:{} allowed updates:{} pending updates:{} : {}'.format(bot.username, webhook_info.url, webhook_info.max_connections, real_allowed, webhook_info.pending_update_count, setted))
-
+                    if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
+                        hookurl = '{}/{}/{}/'.format(webhook_site, webhook_base, token)
+                        max_connections = b.get('WEBHOOK_MAX_CONNECTIONS', 40)
+                        setted = bot.setWebhook(hookurl, certificate=certificate, timeout=timeout, max_connections=max_connections, allowed_updates=allowed_updates)
+                        webhook_info = bot.getWebhookInfo()
+                        real_allowed = webhook_info.allowed_updates if webhook_info.allowed_updates else ["ALL"]
+                        bot.more_info = webhook_info
+                        logger.info('Telegram Bot <{}> setting webhook [ {} ] max connections:{} allowed updates:{} pending updates:{} : {}'.format(bot.username, webhook_info.url, webhook_info.max_connections, real_allowed, webhook_info.pending_update_count, setted))
+                    else:
+                        logger.info('Telegram Bot setting webhook without enabling receiving')
                 except InvalidToken:
                     logger.error('Invalid Token : {}'.format(token))
                     return
@@ -222,12 +223,19 @@ class DjangoTelegramBot(AppConfig):
 
             else:
                 try:
-                    updater = Updater(token=token, request_kwargs=proxy, use_context=context)
-                    bot = updater.bot
-                    bot.delete_webhook()
-                    DjangoTelegramBot.updaters.append(updater)
-                    DjangoTelegramBot.dispatchers.append(updater.dispatcher)
-                    DjangoTelegramBot.__used_tokens.add(token)
+                    if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
+                        updater = Updater(token=token, request_kwargs=proxy, use_context=context)
+                        bot = updater.bot
+                        bot.delete_webhook()
+                        DjangoTelegramBot.updaters.append(updater)
+                        DjangoTelegramBot.dispatchers.append(updater.dispatcher)
+                        DjangoTelegramBot.__used_tokens.add(token)
+                    else:
+                        request = None
+                        if proxy:
+                            request = Request(proxy_url=proxy['proxy_url'], urllib3_proxy_kwargs=proxy['urllib3_proxy_kwargs'])
+                        bot = telegram.Bot(token=token, request=request)
+                        DjangoTelegramBot.dispatchers.append(Dispatcher(bot, None, workers=0, use_context=context))
                 except InvalidToken:
                     logger.error('Invalid Token : {}'.format(token))
                     return
@@ -247,8 +255,10 @@ class DjangoTelegramBot(AppConfig):
             DjangoTelegramBot.bot_tokens.append(token)
             DjangoTelegramBot.bot_usernames.append(bot.username)
 
-
-        logger.debug('Telegram Bot <{}> set as default bot'.format(DjangoTelegramBot.bots[0].username))
+        if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
+            logger.debug('Telegram Bot <{}> set as default bot'.format(DjangoTelegramBot.bots[0].username))
+        else:
+            logger.debug('Telegram Bot <{}> set as default bot'.format(DjangoTelegramBot.bot_tokens[0]))
 
         def module_imported(module_name, method_name, execute):
             try:
