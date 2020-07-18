@@ -85,6 +85,8 @@ And set your bots::
 
             'BOTS' : [
                 {
+                   'ID': 'MainBot', #Unique identifier for your bot (used in your code only)
+
                    'TOKEN': '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11', #Your bot token.
 
                    #'CONTEXT': True,  # Use context based handler functions
@@ -184,6 +186,7 @@ Then use it in a project creating a module ``telegrambot.py`` in your app ::
             # Default dispatcher (this is related to the first bot in settings.DJANGO_TELEGRAMBOT['BOTS'])
             dp = DjangoTelegramBot.dispatcher
             # To get Dispatcher related to a specific bot
+            # dp = DjangoTelegramBot.getDispatcher('BOT_n_id')        #get by bot identifier
             # dp = DjangoTelegramBot.getDispatcher('BOT_n_token')     #get by bot token
             # dp = DjangoTelegramBot.getDispatcher('BOT_n_username')  #get by bot username
 

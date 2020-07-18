@@ -2,6 +2,8 @@
 # django_telegram_bot/apps.py
 import os.path
 import importlib
+from collections import OrderedDict
+
 import telegram
 import logging
 from time import sleep
@@ -43,42 +45,58 @@ class DjangoTelegramBot(AppConfig):
     name = 'django_telegrambot'
     verbose_name = 'Django TelegramBot'
     ready_run = False
-    bot_tokens = []
-    bot_usernames = []
-    dispatchers = []
-    bots = []
-    updaters = []
+    bots_data = OrderedDict()
     __used_tokens = set()
 
     @classproperty
     def dispatcher(cls):
-        #print("Getting value default dispatcher")
-        cls.__used_tokens.add(cls.bot_tokens[0])
-        return cls.dispatchers[0]
+        try:
+            #print("Getting value default dispatcher")
+            bot_data = list(cls.bots_data.values())[0]
+            cls.__used_tokens.add(bot_data['token'])
+            return next(bot_data['dispatcher'])
+        except StopIteration:
+            raise ReferenceError("No bots are defined")
 
     @classproperty
     def updater(cls):
-        #print("Getting value default updater")
-        cls.__used_tokens.add(cls.bot_tokens[0])
-        return cls.updaters[0]
+        try:
+            #print("Getting value default dispatcher")
+            bot_data = list(cls.bots_data.values())[0]
+            cls.__used_tokens.add(bot_data['token'])
+            return next(bot_data['updater'])
+        except StopIteration:
+            raise ReferenceError("No bots are defined")
+
 
     @classmethod
-    def get_dispatcher(cls, bot_id=None, safe=True):
+    def getBotById(cls, bot_id=None, safe=True):
         if bot_id is None:
-            cls.__used_tokens.add(cls.bot_tokens[0])
-            return cls.dispatchers[0]
+            return list(cls.bots_data.values())[0]
         else:
             try:
-                index = cls.bot_tokens.index(bot_id)
-            except ValueError:
+                bot = cls.bots_data[bot_id]
+            except KeyError:
                 if not safe:
                     return None
                 try:
-                    index = cls.bot_usernames.index(bot_id)
-                except ValueError:
-                    return None
-            cls.__used_tokens.add(cls.bot_tokens[index])
-            return cls.dispatchers[index]
+                    bot = next(filter(lambda bot: bot['id'] == bot_id, list(cls.bots_data.values())))
+                except StopIteration:
+                    try:
+                        bot = next(filter(lambda bot: bot['bot'].username == bot_id, list(cls.bots_data.values())))
+                    except StopIteration:
+                        return None
+            cls.__used_tokens.add(bot['token'])
+            return bot
+
+
+    @classmethod
+    def get_dispatcher(cls, bot_id=None, safe=True):
+        bot = cls.getBotById(bot_id, safe)
+        if bot:
+            return bot['dispatcher']
+        else:
+            return None
 
 
     @classmethod
@@ -88,22 +106,11 @@ class DjangoTelegramBot(AppConfig):
 
     @classmethod
     def get_bot(cls, bot_id=None, safe=True):
-        if bot_id is None:
-            if safe:
-                return cls.bots[0]
-            else:
-                return None
+        bot = cls.getBotById(bot_id, safe)
+        if bot:
+            return bot['bot']
         else:
-            try:
-                index = cls.bot_tokens.index(bot_id)
-            except ValueError:
-                if not safe:
-                    return None
-                try:
-                    index = cls.bot_usernames.index(bot_id)
-                except ValueError:
-                    return None
-            return cls.bots[index]
+            return None
 
 
     @classmethod
@@ -113,19 +120,11 @@ class DjangoTelegramBot(AppConfig):
 
     @classmethod
     def get_updater(cls, bot_id=None, safe=True):
-        if bot_id is None:
-            return cls.updaters[0]
+        bot = cls.getBotById(bot_id, safe)
+        if bot:
+            return bot['updater']
         else:
-            try:
-                index = cls.bot_tokens.index(bot_id)
-            except ValueError:
-                if not safe:
-                    return None
-                try:
-                    index = cls.bot_usernames.index(bot_id)
-                except ValueError:
-                    return None
-            return cls.updaters[index]
+            return None
 
 
     @classmethod
@@ -170,11 +169,12 @@ class DjangoTelegramBot(AppConfig):
                 logger.error('WEBHOOK_CERTIFICATE not found in {} '.format(cert))
 
         for b in bots_list:
-            token = b.get('TOKEN', None)
-            context = b.get('CONTEXT', False)
-            if not token:
-                break
+            bot_data = {
+                'token': b['TOKEN'],
+                'id': b.get('ID', None)
+            }
 
+            context = b.get('CONTEXT', False),
             allowed_updates = b.get('ALLOWED_UPDATES', None)
             timeout = b.get('TIMEOUT', None)
             proxy = b.get('PROXY', None)
@@ -188,16 +188,16 @@ class DjangoTelegramBot(AppConfig):
                             request = Request(proxy_url=proxy['proxy_url'], urllib3_proxy_kwargs=proxy['urllib3_proxy_kwargs'], con_pool_size=b.get('MESSAGEQUEUE_REQUEST_CON_POOL_SIZE',8))
                         else:
                             request = Request(con_pool_size=b.get('MESSAGEQUEUE_REQUEST_CON_POOL_SIZE',8))
-                        bot = MQBot(token, request=request, mqueue=q)
+                        bot = MQBot(bot_data['token'], request=request, mqueue=q)
                     else:
                         request = None
                         if proxy:
                             request = Request(proxy_url=proxy['proxy_url'], urllib3_proxy_kwargs=proxy['urllib3_proxy_kwargs'])
-                        bot = telegram.Bot(token=token, request=request)
+                        bot = telegram.Bot(token=bot_data['token'], request=request)
 
-                    DjangoTelegramBot.dispatchers.append(Dispatcher(bot, None, workers=0, use_context=context))
+                    bot_data['dispatcher'] = Dispatcher(bot, None, workers=0, use_context=context)
                     if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
-                        hookurl = '{}/{}/{}/'.format(webhook_site, webhook_base, token)
+                        hookurl = '{}/{}/{}/'.format(webhook_site, webhook_base, bot_data['token'])
                         max_connections = b.get('WEBHOOK_MAX_CONNECTIONS', 40)
                         setted = bot.setWebhook(hookurl, certificate=certificate, timeout=timeout, max_connections=max_connections, allowed_updates=allowed_updates)
                         webhook_info = bot.getWebhookInfo()
@@ -207,7 +207,7 @@ class DjangoTelegramBot(AppConfig):
                     else:
                         logger.info('Telegram Bot setting webhook without enabling receiving')
                 except InvalidToken:
-                    logger.error('Invalid Token : {}'.format(token))
+                    logger.error('Invalid Token : {}'.format(bot_data['token']))
                     return
                 except RetryAfter as er:
                     logger.debug('Error: "{}". Will retry in {} seconds'.format(
@@ -224,20 +224,20 @@ class DjangoTelegramBot(AppConfig):
             else:
                 try:
                     if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
-                        updater = Updater(token=token, request_kwargs=proxy, use_context=context)
+                        updater = Updater(token=bot_data['token'], request_kwargs=proxy, use_context=context)
                         bot = updater.bot
                         bot.delete_webhook()
-                        DjangoTelegramBot.updaters.append(updater)
-                        DjangoTelegramBot.dispatchers.append(updater.dispatcher)
-                        DjangoTelegramBot.__used_tokens.add(token)
+                        bot_data['updater'] = updater
+                        bot_data['dispatcher'] = updater.dispatcher
+                        DjangoTelegramBot.__used_tokens.add(bot_data['token'])
                     else:
                         request = None
                         if proxy:
                             request = Request(proxy_url=proxy['proxy_url'], urllib3_proxy_kwargs=proxy['urllib3_proxy_kwargs'])
-                        bot = telegram.Bot(token=token, request=request)
-                        DjangoTelegramBot.dispatchers.append(Dispatcher(bot, None, workers=0, use_context=context))
+                        bot = telegram.Bot(token=bot_data['token'], request=request)
+                        bot_data['dispatcher'] = Dispatcher(bot, None, workers=0, use_context=context)
                 except InvalidToken:
-                    logger.error('Invalid Token : {}'.format(token))
+                    logger.error('Invalid Token : {}'.format(bot_data['token']))
                     return
                 except RetryAfter as er:
                     logger.debug('Error: "{}". Will retry in {} seconds'.format(
@@ -251,14 +251,14 @@ class DjangoTelegramBot(AppConfig):
                     logger.error('Error: "{}"'.format(er.message))
                     return
 
-            DjangoTelegramBot.bots.append(bot)
-            DjangoTelegramBot.bot_tokens.append(token)
-            DjangoTelegramBot.bot_usernames.append(bot.username)
+            bot_data['bot'] = bot
+            DjangoTelegramBot.bots_data[bot_data['token']] = bot_data
 
+        first_bot = list(DjangoTelegramBot.bots_data.values())[0]
         if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
-            logger.debug('Telegram Bot <{}> set as default bot'.format(DjangoTelegramBot.bots[0].username))
+            logger.debug('Telegram Bot <{}> set as default bot'.format(first_bot['bot'].username))
         else:
-            logger.debug('Telegram Bot <{}> set as default bot'.format(DjangoTelegramBot.bot_tokens[0]))
+            logger.debug('Telegram Bot <{}> set as default bot'.format(first_bot['id'] if first_bot['id'] else first_bot['token']))
 
         def module_imported(module_name, method_name, execute):
             try:
