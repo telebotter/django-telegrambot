@@ -77,9 +77,9 @@ And set your bots::
                                  # apps contain telegrambot.py files that cannot be successfully
                                  # imported.
 
-            'DISABLE_SETUP': True, # If set to false, there will be no tries to set webhook or read
-                                   # updates from the telegram server on app's start
-                                   # (useful when developing on local machine; makes django's startup faster)
+            'DISABLE_SETUP': False, # If set to True, there will be no tries to set webhook or read
+                                    # updates from the telegram server on app's start
+                                    # (useful when developing on local machine; makes django's startup faster)
 
             'BOT_MODULE_NAME': 'telegrambot_handlers', #(Optional [str])  # The default name for file name containing telegram handlers which has to be placed inside your local app(s). Default is 'telegrambot'. Example is to put "telegrambot_handlers.py" file to local app's folder.
 
