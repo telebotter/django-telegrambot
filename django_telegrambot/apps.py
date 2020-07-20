@@ -45,16 +45,16 @@ class DjangoTelegramBot(AppConfig):
     name = 'django_telegrambot'
     verbose_name = 'Django TelegramBot'
     ready_run = False
-    bots_data = OrderedDict()
+    bots_data = list()
     __used_tokens = set()
 
     @classproperty
     def dispatcher(cls):
         try:
             #print("Getting value default dispatcher")
-            bot_data = list(cls.bots_data.values())[0]
+            bot_data = cls.bots_data[0]
             cls.__used_tokens.add(bot_data['token'])
-            return next(bot_data['dispatcher'])
+            return bot_data['dispatcher']
         except StopIteration:
             raise ReferenceError("No bots are defined")
 
@@ -62,9 +62,9 @@ class DjangoTelegramBot(AppConfig):
     def updater(cls):
         try:
             #print("Getting value default dispatcher")
-            bot_data = list(cls.bots_data.values())[0]
+            bot_data = cls.bots_data[0]
             cls.__used_tokens.add(bot_data['token'])
-            return next(bot_data['updater'])
+            return bot_data['updater']
         except StopIteration:
             raise ReferenceError("No bots are defined")
 
@@ -72,18 +72,18 @@ class DjangoTelegramBot(AppConfig):
     @classmethod
     def _get_bot_by_id(cls, bot_id=None, safe=True):
         if bot_id is None:
-            return list(cls.bots_data.values())[0]
+            return cls.bots_data[0]
         else:
             try:
-                bot = cls.bots_data[bot_id]
-            except KeyError:
+                bot = next(filter(lambda bot: bot['token'] == bot_id, cls.bots_data))
+            except StopIteration:
                 if not safe:
                     return None
                 try:
-                    bot = next(filter(lambda bot: bot['id'] == bot_id, list(cls.bots_data.values())))
+                    bot = next(filter(lambda bot: bot['id'] == bot_id, cls.bots_data))
                 except StopIteration:
                     try:
-                        bot = next(filter(lambda bot: bot['bot'].username == bot_id, list(cls.bots_data.values())))
+                        bot = next(filter(lambda bot: bot['bot'].username == bot_id, cls.bots_data))
                     except StopIteration:
                         return None
             cls.__used_tokens.add(bot['token'])
@@ -252,9 +252,9 @@ class DjangoTelegramBot(AppConfig):
                     return
 
             bot_data['bot'] = bot
-            DjangoTelegramBot.bots_data[bot_data['token']] = bot_data
+            DjangoTelegramBot.bots_data.append(bot_data)
 
-        first_bot = list(DjangoTelegramBot.bots_data.values())[0]
+        first_bot = DjangoTelegramBot.bots_data[0]
         if not settings.DJANGO_TELEGRAMBOT.get('DISABLE_SETUP', False):
             logger.debug('Telegram Bot <{}> set as default bot'.format(first_bot['bot'].username))
         else:
