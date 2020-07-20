@@ -1,48 +1,19 @@
-NOTE: This is a fork of the original django-telegrambot module, it contains updates to new django and ptb versions. To install this fork run: ``pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade`` The information below are related to the original module.
+NOTE: This is a fork of the original django-telegrambot module, it contains updates to new django and ptb versions and features/fixes from contributors. To install this fork run: ``pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade``. 
+## Documentation
 
-=============================
-django-telegrambot
-=============================
-
-.. image:: https://badge.fury.io/py/django-telegrambot.png
-    :target: https://badge.fury.io/py/django-telegrambot
-
-.. image:: https://travis-ci.org/JungDev/django-telegrambot.png?branch=master
-    :target: https://travis-ci.org/JungDev/django-telegrambot
-
-.. image:: https://img.shields.io/badge/Donate-PayPal-green.svg
-    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LMXQVQ3YA2JJQ
-
-.. image:: http://pepy.tech/badge/django-telegrambot
-    :target: http://pepy.tech/count/django-telegrambot
-
-A simple app to develop Telegram bots with Django
-
-Documentation
--------------
-
-The full documentation is at https://django-telegrambot.readthedocs.org.
-
-If this project help you reduce time to develop, you can give me a cup of coffee :)
-
-.. image:: https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif
-    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LMXQVQ3YA2JJQ
+The full documentation of the original library is at https://django-telegrambot.readthedocs.org.
 
 
-Changelog
-------------
-* **IMPORTANT ver 1.0.0** : If you upgrade from a previous version, you **MUST** change how to include ``django_telegrambot.urls`` and modify your ``settings.py``.
+## Changelog
+The latest version to the base repository was v1.0.1, this fork started as a PR for v1.0.2
 
 
-Quickstart
-----------
-
+## Quickstart
 Install django-telegrambot::
 
-    pip install django-telegrambot
+    pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade
 
-Configure your installation
----------------------------
+## Register the App
 
 Add ``django_telegrambot`` in ``INSTALLED_APPS`` ::
 
@@ -53,7 +24,8 @@ Add ``django_telegrambot`` in ``INSTALLED_APPS`` ::
            ...
        )
 
-And set your bots::
+
+## Setup your Bots
 
         #settings.py
         #Django Telegram Bot settings
@@ -85,11 +57,11 @@ And set your bots::
 
             'BOTS' : [
                 {
-                   'ID': 'MainBot', #Unique identifier for your bot (used in your code only)
+                   'ID': 'MainBot', # Unique identifier for your bot (used in your code only)
 
-                   'TOKEN': '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11', #Your bot token.
+                   'TOKEN': '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11', # Your bots token (provided by botfather)
 
-                   #'CONTEXT': True,  # Use context based handler functions
+                   'CONTEXT': True,  # Use context based handler functions (should be true for future versions)
 
                    #'ALLOWED_UPDATES':(Optional[list[str]]), # List the types of
         						   #updates you want your bot to receive. For example, specify
@@ -135,14 +107,14 @@ And set your bots::
         		                   #server. Will be added to the `timeout` value and used as the read timeout from
                                    #server (Default: 2).
                 },
-                #Other bots here with same structure.
+                # Other bots here with same structure.
             ],
 
         }
 
 
 
-Include in your urls.py the ``django_telegrambot.urls`` (NB: If you upgrade from a previous version, you MUST change how to include ``django_telegrambot.urls``. Never set prefix here!)::
+Include in your urls.py the ``django_telegrambot.urls``
 
         #urls.py
         urlpatterns = [
@@ -151,7 +123,7 @@ Include in your urls.py the ``django_telegrambot.urls`` (NB: If you upgrade from
             ...
         ]
 
-Then use it in a project creating a module ``telegrambot.py`` in your app ::
+Then use it in a project creating a module ``telegrambot.py`` in your app
 
         #myapp/telegrambot.py
         # Example code for telegrambot.py module
@@ -202,8 +174,15 @@ Then use it in a project creating a module ``telegrambot.py`` in your app ::
 
 
 
-Features
---------
+## Features of this Fork
+
+* Support latest django and python-telegram-bot versions
+* Support latest telegram bot API
+* Optionally skip webhook setup
+* Change bots from settings (use personal bot_id instead of registered botname)
+
+
+## Original Features
 
 * Multiple bots
 * Admin dashboard available at ``/admin/django-telegrambot``
@@ -212,13 +191,13 @@ Features
       ``(myenv) $ python manage.py botpolling --username=<username_bot>``
 * Supporting messagequeues
 
-Contributing
-------------
 
-Patches and bug reports are welcome, just please keep the style consistent with the original source.
 
-Running Tests
---------------
+
+
+## Running Tests
+
+NOTE: The tests have not been updated for latest features. See Issue #13
 
 Does the code actually work?
 
@@ -228,8 +207,9 @@ Does the code actually work?
     (myenv) $ pip install -r requirements-test.txt
     (myenv) $ python runtests.py
 
-Sample Application
-------------------
+
+## Sample Application
+
 There a sample application in `sampleproject` directory. Here is installation instructions:
 
 1. Install requirements with command
@@ -259,17 +239,13 @@ There a sample application in `sampleproject` directory. Here is installation in
 
 10. Start a chat with your bot using telegram.me link avaible in **Django-Telegram Dashboard** at http://localhost/admin/django-telegrambot
 
-Credits
----------
+
+## Credits
 Required package:
 
 *  `Python Telegram Bot`_
 
 .. _`Python Telegram Bot`: https://github.com/python-telegram-bot/python-telegram-bot
 
-Tools used in rendering this package:
 
-*  Cookiecutter_
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
 
