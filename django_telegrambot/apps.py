@@ -70,7 +70,7 @@ class DjangoTelegramBot(AppConfig):
 
 
     @classmethod
-    def getBotById(cls, bot_id=None, safe=True):
+    def _get_bot_by_id(cls, bot_id=None, safe=True):
         if bot_id is None:
             return list(cls.bots_data.values())[0]
         else:
@@ -92,7 +92,7 @@ class DjangoTelegramBot(AppConfig):
 
     @classmethod
     def get_dispatcher(cls, bot_id=None, safe=True):
-        bot = cls.getBotById(bot_id, safe)
+        bot = cls._get_bot_by_id(bot_id, safe)
         if bot:
             return bot['dispatcher']
         else:
@@ -106,7 +106,7 @@ class DjangoTelegramBot(AppConfig):
 
     @classmethod
     def get_bot(cls, bot_id=None, safe=True):
-        bot = cls.getBotById(bot_id, safe)
+        bot = cls._get_bot_by_id(bot_id, safe)
         if bot:
             return bot['bot']
         else:
@@ -120,7 +120,7 @@ class DjangoTelegramBot(AppConfig):
 
     @classmethod
     def get_updater(cls, bot_id=None, safe=True):
-        bot = cls.getBotById(bot_id, safe)
+        bot = cls._get_bot_by_id(bot_id, safe)
         if bot:
             return bot['updater']
         else:
