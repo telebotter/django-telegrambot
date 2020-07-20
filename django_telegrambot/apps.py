@@ -55,7 +55,7 @@ class DjangoTelegramBot(AppConfig):
             bot_data = cls.bots_data[0]
             cls.__used_tokens.add(bot_data['token'])
             return bot_data['dispatcher']
-        except StopIteration:
+        except (StopIteration, IndexError):
             raise ReferenceError("No bots are defined")
 
     @classproperty
@@ -65,14 +65,17 @@ class DjangoTelegramBot(AppConfig):
             bot_data = cls.bots_data[0]
             cls.__used_tokens.add(bot_data['token'])
             return bot_data['updater']
-        except StopIteration:
+        except (StopIteration, IndexError):
             raise ReferenceError("No bots are defined")
 
 
     @classmethod
     def _get_bot_by_id(cls, bot_id=None, safe=True):
         if bot_id is None:
-            return cls.bots_data[0]
+            try:
+                return cls.bots_data[0]
+            except IndexError:
+                return None
         else:
             try:
                 bot = next(filter(lambda bot: bot['token'] == bot_id, cls.bots_data))
