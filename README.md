@@ -9,13 +9,13 @@ The latest version to the base repository was v1.0.1, this fork started as a PR 
 
 
 ## Quickstart
-Install django-telegrambot::
+Install django-telegrambot
 
     pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade
 
 ## Register the App
 
-Add ``django_telegrambot`` in ``INSTALLED_APPS`` ::
+Add ``django_telegrambot`` in ``INSTALLED_APPS`` 
 
        #settings.py
        INSTALLED_APPS = (
@@ -201,8 +201,6 @@ NOTE: The tests have not been updated for latest features. See Issue #13
 
 Does the code actually work?
 
-::
-
     source <YOURVIRTUALENV>/bin/activate
     (myenv) $ pip install -r requirements-test.txt
     (myenv) $ python runtests.py
@@ -241,11 +239,10 @@ There a sample application in `sampleproject` directory. Here is installation in
 
 
 ## Credits
-Required package:
 
-*  `Python Telegram Bot`_
-
-.. _`Python Telegram Bot`: https://github.com/python-telegram-bot/python-telegram-bot
+*  `Python Telegram Bot` https://github.com/python-telegram-bot/python-telegram-bot
+* `Django` https://www.djangoproject.com/
+* `django-telegrambot` https://github.com/JungDev/django-telegrambot
 
 
 
