@@ -1,21 +1,32 @@
-NOTE: This is a fork of the original django-telegrambot module, it contains updates to new django and ptb versions and features/fixes from contributors. To install this fork run: ``pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade``. 
-## Documentation
+NOTE: This is a fork of the original django-telegrambot module, it contains updates to new django and ptb versions and features/fixes from contributors. To install this fork run:: 
+
+    pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade 
+
+Documentation
+=============
 
 The full documentation of the original library is at https://django-telegrambot.readthedocs.org.
 
 
-## Changelog
+Changelog
+=========
+
 The latest version to the base repository was v1.0.1, this fork started as a PR for v1.0.2
 
 
-## Quickstart
+Quickstart
+==========
+
 Install django-telegrambot
+::
 
     pip install -e git+https://github.com/telebotter/django-telegrambot.git#egg=django-telegrambot --upgrade
 
-## Register the App
+Register the App
+=============
 
 Add ``django_telegrambot`` in ``INSTALLED_APPS`` 
+::
 
        #settings.py
        INSTALLED_APPS = (
@@ -25,7 +36,9 @@ Add ``django_telegrambot`` in ``INSTALLED_APPS``
        )
 
 
-## Setup your Bots
+Setup your Bots
+=============
+::
 
         #settings.py
         #Django Telegram Bot settings
@@ -115,6 +128,7 @@ Add ``django_telegrambot`` in ``INSTALLED_APPS``
 
 
 Include in your urls.py the ``django_telegrambot.urls``
+::
 
         #urls.py
         urlpatterns = [
@@ -124,6 +138,7 @@ Include in your urls.py the ``django_telegrambot.urls``
         ]
 
 Then use it in a project creating a module ``telegrambot.py`` in your app
+::
 
         #myapp/telegrambot.py
         # Example code for telegrambot.py module
@@ -174,7 +189,8 @@ Then use it in a project creating a module ``telegrambot.py`` in your app
 
 
 
-## Features of this Fork
+Features of this Fork
+=============
 
 * Support latest django and python-telegram-bot versions
 * Support latest telegram bot API
@@ -182,7 +198,8 @@ Then use it in a project creating a module ``telegrambot.py`` in your app
 * Change bots from settings (use personal bot_id instead of registered botname)
 
 
-## Original Features
+Original Features
+=============
 
 * Multiple bots
 * Admin dashboard available at ``/admin/django-telegrambot``
@@ -195,35 +212,43 @@ Then use it in a project creating a module ``telegrambot.py`` in your app
 
 
 
-## Running Tests
+Running Tests
+=============
 
 NOTE: The tests have not been updated for latest features. See Issue #13
 
 Does the code actually work?
+::
 
     source <YOURVIRTUALENV>/bin/activate
     (myenv) $ pip install -r requirements-test.txt
     (myenv) $ python runtests.py
 
 
-## Sample Application
+Sample Application
+=============
 
 There a sample application in `sampleproject` directory. Here is installation instructions:
 
 1. Install requirements with command
+::
 
         pip install -r requirements.txt
+        
 2. Copy file `local_settings.sample.py` as `local_settings.py` and edit your bot token
+::
 
         cp sampleproject/local_settings.sample.py sampleproject/local_settings.py
 
         nano sampleproject/local_settings.py
+        
 3. Run Django migrations
 
         python manage.py migrate
 4. Run server
-
+::
         python manage.py runserver
+        
 5. If **WEBHOOK** Mode setted go to 8
 
 6. If **POLLING** Mode setted, open in your browser http://localhost/
@@ -231,14 +256,17 @@ There a sample application in `sampleproject` directory. Here is installation in
 7. Open Django-Telegram Dashboard http://localhost/admin/django-telegrambot and follow instruction to run worker by management command `botpolling`. Then go to 10
 
 8. To test webhook locally install `ngrok` application and run command
+::
 
         ./ngrok http 8000
+        
 9. Change `WEBHOOK_SITE` and `ALLOWED_HOSTS` in local_settings.py file
 
 10. Start a chat with your bot using telegram.me link avaible in **Django-Telegram Dashboard** at http://localhost/admin/django-telegrambot
 
 
-## Credits
+Credits
+=============
 
 *  `Python Telegram Bot` https://github.com/python-telegram-bot/python-telegram-bot
 * `Django` https://www.djangoproject.com/
